@@ -1,66 +1,55 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed&display=swap");
 
 * {
-    margin: 0;
-    padding: 0;
-    font-family: 'Fira Sans Extra Condensed', sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: "Fira Sans Extra Condensed", sans-serif;
 }
 
 body {
-    background-color: #bea4e0;
+  background-color: black;
 }
 
 .container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    width: 80%;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 80%;
+  margin: 0 auto;
 }
 
 .container--children {
-    margin: 0 20px;
-    padding: 40px 0;
-    width: 100%;
-    text-align: center;
-    border-radius: 10px;
-    background-color: #ba9ee0;
-    color: #ffffff;
-    font-weight: 1000;
-    line-height: 1.2;
-    box-sizing: border-box;
-    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+  margin: 0 20px;
+  padding: 40px 0;
+  width: 100%;
+  text-align: center;
+  border-radius: 10px;
+  background-color: black;
+  color: #ffffff;
+  font-weight: 1000;
+  line-height: 1.2;
+  box-sizing: border-box;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 .container--children span {
-    font-size: 320px;
-}
-
-.container--children span::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 10px;
-    background-color: #bea4e0;
-    transform: translateY(-50%);
+  font-size: 320px;
 }
 
 .footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-  }
-  
-  .footer h4 a {
-    text-decoration: none;
-    color: #ffffff;
-  }
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.footer h4 a {
+  text-decoration: none;
+  color: #ffffff;
+}
