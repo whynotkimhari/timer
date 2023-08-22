@@ -1,6 +1,6 @@
 const app = {
     isFinished: false,
-    audio: new Audio('./wav/clock-tick.wav'),
+    audio: new Audio('wav/clock-tick.wav'),
 
     formatNumber: (number) => {
         if (number < 10) return '0' + number;
