@@ -134,9 +134,19 @@ const app = {
     red: 0,
     green: 0,
     blue: 0,
-    isFinished: false,
+    isPause: false,
     audio: new Audio('wav/clock-tick.wav'),
     finish: new Audio('wav/finish.mp3'),
+
+    fixedValue: 0,
+    totalSeconds: 0,
+    hours: 2,
+    minutes: 0,
+    seconds: 0,
+    TOTAL_MIL: 0,
+
+    idInterval: null,
+    idTimeOut: null,
 
     hexToRGB: (colorCode) => {
         app.red = parseInt(colorCode.substring(1, 3), 16)
@@ -181,51 +191,45 @@ const app = {
 
     setColorCode: () => {
         return Swal.fire({
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp'
-            },
-            title: 'Type the color code',
-            text: 'Type the color code to set the background color',
-            input: 'text',
-            inputPlaceholder: '#hex like #ba9ee0 or just click OK. I will take care of that',
-            inputAttributes: {
-                autocapitalize: 'off',
-                autocomplete: 'off',
-            },
+            title: 'Background Color',
+            html: '<input type="color" id="colorPicker">',
+            showCancelButton: true,
+            confirmButtonText: 'Take this',
+            cancelButtonText: 'Random color',
         })
+          
     },
 
-    formatNumber: (number) => {
+    formatNumber: number => {
         if (number < 10) return '0' + number;
-        else return number;
+        return number;
     },
 
-    countdown: (hours = 0, minutes = 0, seconds = 0) => {
-        totalSeconds = hours * 3600 + minutes * 60 + seconds;
-        const TOTAL_MIL = totalSeconds * 1000;
+    countdown: () => {
+        if (app.totalSeconds > 0) {
+            app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
+            app.TOTAL_MIL = app.totalSeconds * 1000;
 
-        const id = setInterval(() => {
-            hours = Math.floor(totalSeconds / 3600);
-            minutes = Math.floor((totalSeconds - hours * 3600) / 60);
-            seconds = (totalSeconds - hours * 3600 - minutes * 60);
-            totalSeconds--;
+            app.idInterval = setInterval(() => {
+                app.audio.play();
+                app.totalSeconds--;
+                app.hours = Math.floor(app.totalSeconds / 3600);
+                app.minutes = Math.floor((app.totalSeconds - app.hours * 3600) / 60);
+                app.seconds = (app.totalSeconds - app.hours * 3600 - app.minutes * 60);
 
-            document.querySelector('#hour').innerHTML = app.formatNumber(hours)
-            document.querySelector('#minute').innerHTML = app.formatNumber(minutes)
-            document.querySelector('#second').innerHTML = app.formatNumber(seconds)
+                document.querySelector('#hour').innerHTML = app.formatNumber(app.hours)
+                document.querySelector('#minute').innerHTML = app.formatNumber(app.minutes)
+                document.querySelector('#second').innerHTML = app.formatNumber(app.seconds)
+            }, 1000);
 
-            app.audio.play();
-        }, 1000);
+            document.querySelector('body').addEventListener('click', app.changeState);
 
-        setTimeout(() => {
-            clearInterval(id);
-            app.notify();
-        }, TOTAL_MIL + 1000);
-
-
+            app.idTimeOut = setTimeout(() => {
+                clearInterval(app.idInterval);
+                app.notify();
+            }, app.TOTAL_MIL);
+        }
+        else if(app.totalSeconds === 0) app.notify()
     },
 
     setTime: async () => {
@@ -236,42 +240,62 @@ const app = {
             hideClass: {
                 popup: 'animate__animated animate__fadeOutUp'
             },
-            title: 'Type the time',
+            title: 'Study time',
             text: 'How many hours do you want to study?',
             input: 'text',
-            inputPlaceholder: 'please type in HH/MM/SS or default will be 2 hours',
+            inputPlaceholder: 'please type in HH:MM:SS or default will be 2 hours',
             inputAttributes: {
                 autocapitalize: 'off',
                 autocomplete: 'off',
             },
         })
-            .then(response => {
-                const text = response.value;
-                if (text) {
-                    const time = text.split('/');
+        .then(response => {
+            const text = response.value;
+            if (text) {
+                const time = text.split(':');
 
-                    if (time.length === 1 && app.check(time[0])) app.countdown(Number(time[0]))
-
-                    else if (
-                        time.length === 2 &&
-                        app.check(time[0]) &&
-                        app.check(time[1])
-                    ) app.countdown(Number(time[0]), Number(time[1]))
-
-                    else if (
-                        time.length === 3 &&
-                        app.check(time[0]) &&
-                        app.check(time[1]) &&
-                        app.check(time[2])
-                    ) app.countdown(Number(time[0]), Number(time[1]), Number(time[2]))
-
-                    else location.reload();
+                if (time.length === 1 && app.check(time[0])) {
+                    app.hours = Number(time[0])
+                    app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
+                    app.fixedValue = app.totalSeconds;
+                    app.countdown()
                 }
 
-                else {
-                    app.countdown(2)
+                else if (
+                    time.length === 2 &&
+                    app.check(time[0]) &&
+                    app.check(time[1])
+                ) {
+                    app.hours = Number(time[0]),
+                    app.minutes = Number(time[1]),
+                    app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
+                    app.fixedValue = app.totalSeconds;
+                    app.countdown()
                 }
-            })
+
+                else if (
+                    time.length === 3 &&
+                    app.check(time[0]) &&
+                    app.check(time[1]) &&
+                    app.check(time[2])
+                ) {
+                    app.hours = Number(time[0]),
+                    app.minutes = Number(time[1]),
+                    app.seconds = Number(time[2]),
+                    app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
+                    app.fixedValue = app.totalSeconds;
+                    app.countdown()
+                }
+
+                else location.reload();
+            }
+
+            else {
+                app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
+                app.fixedValue = app.totalSeconds;
+                app.countdown()
+            }
+        })
     },
 
     notify: async () => {
@@ -289,40 +313,43 @@ const app = {
         })
     },
 
-    check: (str) => {
+    changeState: () => {
+        if(app.totalSeconds > 0 && app.totalSeconds < app.fixedValue) {
+            if(!app.isPause) {
+                clearInterval(app.idInterval);
+                clearTimeout(app.idTimeOut);
+            }
+            else app.countdown()
+    
+            app.isPause = !app.isPause;
+        }
+    },
+
+    check: str => {
         if (str.length <= 2 && Number(str) >= 0) return true;
         else return false;
     },
 
-    run: () => {
+    run: async () => {
         app.setColorCode()
-            .then((res) => {
-                if (res.isConfirmed) {
-                    app.colorCode = res.value
-                    if (app.colorCode === '') app.colorCode = app.defaults[Math.floor(Math.random() * app.defaults.length)]
+        .then(res => {
+            app.colorCode = res.isConfirmed ? document.getElementById('colorPicker').value : app.defaults[Math.floor(Math.random() * app.defaults.length)]
 
-                    if (app.colorCode[0] === '#') {
-                        app.hexToRGB(app.colorCode)
-                        document.querySelectorAll('.container--children').forEach(el => {
-                            el.style.backgroundColor = `rgb(${app.red},${app.green},${app.blue})`
-                        })
-                        document.querySelector('body').style.backgroundColor = `rgba(${app.red},${app.green},${app.blue}, 0.95)`
+            app.hexToRGB(app.colorCode)
+            document.querySelectorAll('.container--children').forEach(el => {
+                el.style.backgroundColor = `rgb(${app.red},${app.green},${app.blue})`
+            })
 
-                        if (app.specialColors.indexOf(app.colorCode) !== -1) {
-                            document.querySelector('.footer h4 a').style.color = '#000000'
-                            document.querySelectorAll('.container--children').forEach(el => {
-                                el.style.color = '#000000'
-                            })
-                        }
-                    }
-                    else location.reload()
-                    return Promise.resolve()
-                }
-                else location.reload()
-            })
-            .then(() => {
-                app.setTime()
-            })
+            document.querySelector('body').style.backgroundColor = `rgba(${app.red},${app.green},${app.blue}, 0.95)`
+
+            if (app.specialColors.indexOf(app.colorCode) !== -1) {
+                document.querySelector('.footer h4 a').style.color = '#000000'
+                document.querySelectorAll('.container--children').forEach(el => {
+                    el.style.color = '#000000'
+                })
+            }
+        })
+        .then(app.setTime)
 
     }
 }

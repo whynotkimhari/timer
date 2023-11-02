@@ -53,3 +53,9 @@ body {
   text-decoration: none;
   color: #ffffff;
 }
+
+/* Example CSS */
+#colorPicker {
+  width: 200px;
+  height: 70px;
+}
