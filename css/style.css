@@ -59,3 +59,20 @@ body {
   width: 200px;
   height: 70px;
 }
+
+#html-options {
+  display: flex;
+  justify-content: center;
+}
+
+#html-options .row {
+  margin: 0 20px;
+}
+
+[id^="select-"] {
+  width: 100px;
+  height: 50px;
+  text-align: center;
+  font-size: 20px;
+  border-radius: 10px;
+}

@@ -1,5 +1,13 @@
+const create_options = (max) => {
+    htmls = ""
+    for (let i = 0; i <= max; i++) {
+        htmls += `<option value="${i}">${i}</option>`
+    }
+    return htmls
+}
+
 const app = {
-    defaults: [
+    DEFAULT_COLOR: [
         '#000000',
         '#ba9ee0',
         '#e52165',
@@ -120,7 +128,7 @@ const app = {
 
 
     ],
-    specialColors: [
+    SPECIAL_COLOR: [
         '#f3ca20',
         '#e2d810',
         '#ef9d10f',
@@ -130,6 +138,27 @@ const app = {
         '#e5e5dc',
         '#fff1e1'
     ],
+
+    HTML_OPTIONS: `
+        <div id="html-options">
+            <div class="row">
+                <select id="select-hour">
+                    ${create_options(99)}
+                </select>
+            </div>
+            <div class="row">
+                <select id="select-minute">
+                    ${create_options(59)}
+                </select>
+            </div>
+            <div class="row">
+                <select id="select-second">
+                    ${create_options(59)}
+                </select>
+            </div>
+        </div>
+    `,
+
     colorCode: '',
     red: 0,
     green: 0,
@@ -154,50 +183,15 @@ const app = {
         app.blue = parseInt(colorCode.substring(5, 7), 16)
     },
 
-    // hslToRgb: (h, s, l) => {
-    //     h = (h + 360) % 360;
-
-    //     // Ensure saturation and lightness are within the range [0, 1]
-    //     s = Math.min(1, Math.max(0, s));
-    //     l = Math.min(1, Math.max(0, l));
-
-    //     // Helper function to convert hue to RGB
-    //     function hue2rgb(p, q, t) {
-    //         if (t < 0) t += 1;
-    //         if (t > 1) t -= 1;
-    //         if (t < 1 / 6) return p + (q - p) * 6 * t;
-    //         if (t < 1 / 2) return q;
-    //         if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    //         return p;
-    //     }
-
-    //     let r, g, b;
-
-    //     if (s === 0) {
-    //         r = g = b = l;
-    //     } else {
-    //         const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    //         const p = 2 * l - q;
-    //         r = hue2rgb(p, q, h / 360 + 1 / 3);
-    //         g = hue2rgb(p, q, h / 360);
-    //         b = hue2rgb(p, q, h / 360 - 1 / 3);
-    //     }
-
-
-    //     app.red = Math.round(r * 255),
-    //     app.green = Math.round(g * 255),
-    //     app.blue = Math.round(b * 255)
-    // },
-
     setColorCode: () => {
         return Swal.fire({
             title: 'Background Color',
             html: '<input type="color" id="colorPicker">',
             showCancelButton: true,
+            allowOutsideClick: true,
             confirmButtonText: 'Take this',
             cancelButtonText: 'Random color',
         })
-          
     },
 
     formatNumber: number => {
@@ -223,13 +217,16 @@ const app = {
             }, 1000);
 
             document.querySelector('body').addEventListener('click', app.changeState);
+            // document.addEventListener("keydown", (e) => {
+            //     if (e.key === " ") app.changeState();
+            // })
 
             app.idTimeOut = setTimeout(() => {
                 clearInterval(app.idInterval);
                 app.notify();
             }, app.TOTAL_MIL);
         }
-        else if(app.totalSeconds === 0) app.notify()
+        else if (app.totalSeconds === 0) app.notify()
     },
 
     setTime: async () => {
@@ -241,60 +238,23 @@ const app = {
                 popup: 'animate__animated animate__fadeOutUp'
             },
             title: 'Study time',
-            text: 'How many hours do you want to study?',
-            input: 'text',
-            inputPlaceholder: 'please type in HH:MM:SS or default will be 2 hours',
-            inputAttributes: {
-                autocapitalize: 'off',
-                autocomplete: 'off',
-            },
+            showCancelButton: true,
+            allowOutsideClick: true,
+            cancelButtonText: '2-hours study session',
+            html: app.HTML_OPTIONS,
         })
         .then(response => {
-            const text = response.value;
-            if (text) {
-                const time = text.split(':');
-
-                if (time.length === 1 && app.check(time[0])) {
-                    app.hours = Number(time[0])
-                    app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
-                    app.fixedValue = app.totalSeconds;
-                    app.countdown()
-                }
-
-                else if (
-                    time.length === 2 &&
-                    app.check(time[0]) &&
-                    app.check(time[1])
-                ) {
-                    app.hours = Number(time[0]),
-                    app.minutes = Number(time[1]),
-                    app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
-                    app.fixedValue = app.totalSeconds;
-                    app.countdown()
-                }
-
-                else if (
-                    time.length === 3 &&
-                    app.check(time[0]) &&
-                    app.check(time[1]) &&
-                    app.check(time[2])
-                ) {
-                    app.hours = Number(time[0]),
-                    app.minutes = Number(time[1]),
-                    app.seconds = Number(time[2]),
-                    app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
-                    app.fixedValue = app.totalSeconds;
-                    app.countdown()
-                }
-
-                else location.reload();
+            if (response.isConfirmed) {
+                app.hours = Number(document.querySelector('#select-hour').value)
+                app.minutes = Number(document.querySelector('#select-minute').value)
+                app.seconds = Number(document.querySelector('#select-second').value)
             }
 
-            else {
-                app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
-                app.fixedValue = app.totalSeconds;
-                app.countdown()
-            }
+            else if (response.dismiss == Swal.DismissReason.backdrop) location.reload()
+
+            app.totalSeconds = app.hours * 3600 + app.minutes * 60 + app.seconds;
+            app.fixedValue = app.totalSeconds;
+            app.countdown()
         })
     },
 
@@ -314,26 +274,23 @@ const app = {
     },
 
     changeState: () => {
-        if(app.totalSeconds > 0 && app.totalSeconds < app.fixedValue) {
-            if(!app.isPause) {
+        if (app.totalSeconds > 0 && app.totalSeconds < app.fixedValue) {
+            if (!app.isPause) {
                 clearInterval(app.idInterval);
                 clearTimeout(app.idTimeOut);
             }
             else app.countdown()
-    
+
             app.isPause = !app.isPause;
         }
-    },
-
-    check: str => {
-        if (str.length <= 2 && Number(str) >= 0) return true;
-        else return false;
     },
 
     run: async () => {
         app.setColorCode()
         .then(res => {
-            app.colorCode = res.isConfirmed ? document.getElementById('colorPicker').value : app.defaults[Math.floor(Math.random() * app.defaults.length)]
+            if (res.isConfirmed) app.colorCode = document.getElementById('colorPicker').value
+            else if (res.dismiss == Swal.DismissReason.backdrop) location.reload()
+            else app.colorCode = app.DEFAULT_COLOR[Math.floor(Math.random() * app.DEFAULT_COLOR.length)]
 
             app.hexToRGB(app.colorCode)
             document.querySelectorAll('.container--children').forEach(el => {
@@ -342,7 +299,7 @@ const app = {
 
             document.querySelector('body').style.backgroundColor = `rgba(${app.red},${app.green},${app.blue}, 0.95)`
 
-            if (app.specialColors.indexOf(app.colorCode) !== -1) {
+            if (app.SPECIAL_COLOR.indexOf(app.colorCode) !== -1) {
                 document.querySelector('.footer h4 a').style.color = '#000000'
                 document.querySelectorAll('.container--children').forEach(el => {
                     el.style.color = '#000000'
@@ -350,7 +307,6 @@ const app = {
             }
         })
         .then(app.setTime)
-
     }
 }
 
