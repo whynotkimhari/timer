@@ -4,6 +4,6 @@
 - Stop just by 1 click when you need to postpone for some minutes
 
 <div>
-  <img src="https://github.com/whynotkimhari/timer/blob/main/preview/Untitled.png" width="500">
-  <img src="https://github.com/whynotkimhari/timer/blob/main/preview/Untitled2.png" width="500">
+  <img src="https://github.com/whynotkimhari/timer/blob/main/preview/Untitled.png" width="800">
+  <img src="https://github.com/whynotkimhari/timer/blob/main/preview/Untitled2.png" width="800">
 </div>
